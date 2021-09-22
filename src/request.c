@@ -10,7 +10,7 @@
 
 void request_error(int fd, char *cause, char *errnum, char *shortmsg, char *longmsg) {
     char buf[MAXBUF], body[MAXBUF];
-    
+    printf("This is an error xd\n");
     // Create the body of error message first (have to know its length for header)
     sprintf(body, ""
 	    "<!doctype html>\r\n"
@@ -42,7 +42,7 @@ void request_error(int fd, char *cause, char *errnum, char *shortmsg, char *long
 //
 void request_read_headers(int fd) {
     char buf[MAXBUF];
-    
+    printf("This is the request_read_headers function\n");
     readline_or_die(fd, buf, MAXBUF);
     while (strcmp(buf, "\r\n")) {
 	readline_or_die(fd, buf, MAXBUF);
@@ -56,7 +56,7 @@ void request_read_headers(int fd) {
 //
 int request_parse_uri(char *uri, char *filename, char *cgiargs) {
     char *ptr;
-    
+    printf("This is a request_parse_uri function \n");
     if (!strstr(uri, "cgi")) { 
 	// static
 	strcpy(cgiargs, "");
@@ -83,6 +83,7 @@ int request_parse_uri(char *uri, char *filename, char *cgiargs) {
 // Fills in the filetype given the filename
 //
 void request_get_filetype(char *filename, char *filetype) {
+    printf("This is a request_get_filetype function\n");
     if (strstr(filename, ".html")) 
 	strcpy(filetype, "text/html");
     else if (strstr(filename, ".gif")) 
@@ -95,7 +96,7 @@ void request_get_filetype(char *filename, char *filetype) {
 
 void request_serve_dynamic(int fd, char *filename, char *cgiargs) {
     char buf[MAXBUF], *argv[] = { NULL };
-    
+    printf("Here I am 555\n");
     // The server does only a little bit of the header.  
     // The CGI script has to finish writing out the header.
     sprintf(buf, ""
@@ -103,7 +104,6 @@ void request_serve_dynamic(int fd, char *filename, char *cgiargs) {
 	    "Server: OSTEP WebServer\r\n");
     
     write_or_die(fd, buf, strlen(buf));
-    printf("Here I am 555\n");
     if (fork_or_die() == 0) {                        // child
 	setenv_or_die("QUERY_STRING", cgiargs, 1);   // args to cgi go here
 	dup2_or_die(fd, STDOUT_FILENO);              // make cgi writes go to socket (not screen)
@@ -117,7 +117,7 @@ void request_serve_dynamic(int fd, char *filename, char *cgiargs) {
 void request_serve_static(int fd, char *filename, int filesize) {
     int srcfd;
     char *srcp, filetype[MAXBUF], buf[MAXBUF];
-    
+    printf("This is a request_serve_static function\n");
     request_get_filetype(filename, filetype);
     srcfd = open_or_die(filename, O_RDONLY, 0);
     
@@ -147,7 +147,7 @@ void request_handle(int fd) {
     struct stat sbuf;
     char buf[MAXBUF], method[MAXBUF], uri[MAXBUF], version[MAXBUF];
     char filename[MAXBUF], cgiargs[MAXBUF];
-    
+    printf("This is the nave nodriza\n");
     readline_or_die(fd, buf, MAXBUF);
     sscanf(buf, "%s %s %s", method, uri, version);
     printf("method:%s uri:%s version:%s\n", method, uri, version);
