@@ -4,7 +4,7 @@
 //
 // Some of this code stolen from Bryant/O'Halloran
 // Hopefully this is not a problem ... :)
-//
+// h
 
 #define MAXBUF (8192)
 
