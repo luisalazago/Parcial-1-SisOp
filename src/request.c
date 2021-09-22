@@ -103,7 +103,7 @@ void request_serve_dynamic(int fd, char *filename, char *cgiargs) {
 	    "Server: OSTEP WebServer\r\n");
     
     write_or_die(fd, buf, strlen(buf));
-    
+    printf("Here I am 555\n");
     if (fork_or_die() == 0) {                        // child
 	setenv_or_die("QUERY_STRING", cgiargs, 1);   // args to cgi go here
 	dup2_or_die(fd, STDOUT_FILENO);              // make cgi writes go to socket (not screen)
