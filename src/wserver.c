@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <time.h>
+#include <sqlite3.h>
 #include "request.h"
 #include "io_helper.h"
 
@@ -13,6 +14,33 @@
 #define SIZE (NUM * sizeof(int))
 
 char default_root[] = ".";
+
+int insert_database(int* data) {
+	sqlite *db;
+	char *err_msg = 0;
+	int rc = sqlite3_open("database.db", &db);
+
+	if(rc != SQLITE_OK) {
+		fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+		sqlite3_close(db);
+		return 1;
+	}
+
+	char *sql = "DROP Request IF EXIST;"
+				"CREATE TABLE Request(pid INT, time_init INT, time_end INT);";
+	*sql += sqlite3_printf("INSERT INTO Request VALUES('%d','%d','%d'", data[0], data[1], data[2]);
+
+	rc= sqlite3_exec(db, sql, 0, 0, &err_msg);
+	if(rc != SQLITE_OK) {
+		fprintf(stderr, "SQL error: %s\n", err_msg);
+		sqlite3_free(err_msg);
+		sqlite3_close(db);
+		return 1;
+	}
+	
+	sqlite3_close(db);
+	return 0;
+}
 
 int share_memory(pid_t pid, time_t time_init, time_t time_end){
 	int fd = shm_open(NAME, O_CREAT | O_EXCL | O_RDWR, 0600);
@@ -36,6 +64,7 @@ int get_memory(){
 	
 	int *data = (int *)mmap(0, SIZE, PROT_READ, MAP_SHARED, fd, 0);
 	//Codigo para ponerlo en sqllite
+	insert_database(data);
 	printf("Leyendo de la memoria\n");
 	for (int i = 0; i < NUM; ++i) {
         printf("%d\n", data[i]);
