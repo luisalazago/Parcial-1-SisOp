@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
 
     // now, get to work
     int listen_fd = open_listen_fd_or_die(port);
-	pid_t pid_serv_manager = fork(); // Wserver process manager Punto 3)
+	pid_t pid_serv_manager = 1 // fork(); // Wserver process manager Punto 3)
 	if(!pid_serv_manager){
 		while(1){
 			if(!get_memory())
@@ -136,6 +136,7 @@ int main(int argc, char *argv[]) {
 					while(share_memory(pid_request, time_init, time_end)){
 						printf("Error sharing memory trying again\n\n");
 					}
+					break;
 				}
 			}
 			//Terminate the child process
