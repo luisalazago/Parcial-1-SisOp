@@ -5,7 +5,7 @@
 CC = gcc
 CFLAGS = -Wall
 OBJS = wserver.o wclient.o request.o io_helper.o 
-SHARE = -lrt
+SHARE = -lrt -lsqlite3
 
 .SUFFIXES: .c .o 
 
