@@ -16,7 +16,7 @@
 char default_root[] = ".";
 
 int insert_database(int* data) {
-	sqlite *db;
+	sqlite3 *db;
 	char *err_msg = 0;
 	int rc = sqlite3_open("database.db", &db);
 
