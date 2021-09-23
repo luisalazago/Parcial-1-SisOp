@@ -36,6 +36,10 @@ int get_memory(){
 	
 	int *data = (int *)mmap(0, SIZE, PROT_READ, MAP_SHARED, fd, 0);
 	//Codigo para ponerlo en sqllite
+	printf("Leyendo de la memoria\n");
+	for (int i = 0; i < NUM; ++i) {
+        printf("%d\n", data[i]);
+    }
 	munmap(data, SIZE);
 	close(fd);
 	shm_unlink(NAME);
@@ -79,7 +83,6 @@ int main(int argc, char *argv[]) {
 		int flag = 1;
 		while (1) {
 			if(flag){
-
 				//Punto 2) crear un proceso que se encargue de una petición http
 				time_t time_init = time(NULL);
 				pid_t pid_request = fork();
@@ -100,6 +103,7 @@ int main(int argc, char *argv[]) {
 					waitpid(pid_request, NULL, 0);
 					printf(" %d\n\n", pid_request);
 					time_t time_end = time(NULL);
+					printf("Enviado a la memoria: %d, %d, %d\n", pid_request, time_init, time_end);
 					while(share_memory(pid_request, time_init, time_end)){
 						printf("Error sharing memory trying again\n\n");
 					}
