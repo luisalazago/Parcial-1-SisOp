@@ -28,7 +28,7 @@ int insert_database(int* data) {
 
 	char *sql = "DROP Request IF EXIST;"
 				"CREATE TABLE Request(pid INT, time_init INT, time_end INT);";
-	*sql += sqlite3_mprintf("INSERT INTO Request VALUES('%d','%d','%d'", data[0], data[1], data[2]);
+	*sql += sqlite3_mprintf("INSERT INTO Request VALUES('%d','%d','%d')", data[0], data[1], data[2]);
 
 	rc= sqlite3_exec(db, sql, 0, 0, &err_msg);
 	if(rc != SQLITE_OK) {
