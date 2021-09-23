@@ -64,7 +64,7 @@ int get_memory(){
 	
 	int *data = (int *)mmap(0, SIZE, PROT_READ, MAP_SHARED, fd, 0);
 	//Codigo para ponerlo en sqllite
-	//insert_database(data);
+	insert_database(data);
 	printf("Leyendo de la memoria\n");
 	for (int i = 0; i < NUM; ++i) {
         printf("%d\n", data[i]);
@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
 
     // now, get to work
     int listen_fd = open_listen_fd_or_die(port);
-	pid_t pid_serv_manager = 1; // fork(); // Wserver process manager Punto 3)
+	pid_t pid_serv_manager = 0; // fork(); // Wserver process manager Punto 3)
 	if(!pid_serv_manager){
 		while(1){
 			if(!get_memory())
