@@ -25,4 +25,3 @@ spin.cgi: spin.c
 
 clean:
 	-rm -f $(OBJS) wserver wclient spin.cgi
-

@@ -15,30 +15,47 @@
 
 char default_root[] = ".";
 
-int insert_database(int* data) {
-	sqlite3 *db;
-	char *err_msg = 0;
-	int rc = sqlite3_open("database.db", &db);
-
-	if(rc != SQLITE_OK) {
-		fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
-		sqlite3_close(db);
-		return 1;
+static int callback(void *NotUsed, int argc, char **argv, char **azColNAme){
+	int i;
+	for(i = 0; i <argc;++i){
+		printf("%s = %s\n", azColNAme[i], argv[i] ? argv[i] : "NULL");
 	}
+	printf("\n");
+	return 0;
+}
 
-	char *sql = "DROP Request IF EXIST;"
-				"CREATE TABLE Request(pid INT, time_init INT, time_end INT);";
-	*sql += sqlite3_mprintf("INSERT INTO Request VALUES('%d','%d','%d')", data[0], data[1], data[2]);
+int insert_database(int* data, 	sqlite3 *db){
+	char *err_msg = 0;
+	int rc;
 
-	rc= sqlite3_exec(db, sql, 0, 0, &err_msg);
+	// printf("Estoy revisando la creacion %d\n", rc);
+	// if(rc != SQLITE_OK) {
+	// 	fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+	// 	sqlite3_close(db);
+	// 	return 1;
+	// }
+
+	// char *sql_c = "CREATE TABLE Request(pid INT, time_init INT, time_end INT);";
+	
+	// rc= sqlite3_exec(db, sql_c, 0, 0, &err_msg);
+	// printf("Estoy revisando la Tablar %d\n", rc);
+	// if(rc != SQLITE_OK) {
+	// 	fprintf(stderr, "Cannot create database: %s\n", err_msg);
+	// 	sqlite3_close(db);
+	// 	return 1;
+	// }
+
+	char sql_i[500];
+	sprintf(sql_i, "INSERT INTO Request (pid, time_init, time_end) VALUES(%d, %d, %d);", data[0], data[1], data[2]);
+	rc= sqlite3_exec(db, sql_i, callback, 0, &err_msg);
+	printf("Estoy revisando el insert %d\n", rc);
+	printf("Y el mensaj es %s\n", sql_i);
 	if(rc != SQLITE_OK) {
 		fprintf(stderr, "SQL error: %s\n", err_msg);
 		sqlite3_free(err_msg);
-		sqlite3_close(db);
 		return 1;
 	}
-	
-	sqlite3_close(db);
+
 	return 0;
 }
 
@@ -57,18 +74,16 @@ int share_memory(pid_t pid, time_t time_init, time_t time_end){
 	return EXIT_SUCCESS;
 }
 
-int get_memory(){
+int get_memory(sqlite3 *db){
 	int fd = shm_open(NAME, O_RDONLY, 0666);
 	if(fd < 0)
 		return EXIT_FAILURE;
 	
 	int *data = (int *)mmap(0, SIZE, PROT_READ, MAP_SHARED, fd, 0);
 	//Codigo para ponerlo en sqllite
-	insert_database(data);
-	printf("Leyendo de la memoria\n");
-	for (int i = 0; i < NUM; ++i) {
-        printf("%d\n", data[i]);
-    }
+	if(insert_database(data, db))
+		printf("Error al cargar la base de datos\n");
+
 	munmap(data, SIZE);
 	close(fd);
 	shm_unlink(NAME);
@@ -81,7 +96,15 @@ int main(int argc, char *argv[]) {
     int c;
     char *root_dir = default_root;
     int port = 10000;
-    
+    sqlite3 *db;
+	int rc = sqlite3_open("database.db", &db);
+
+	if(rc != SQLITE_OK) {
+		fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+		sqlite3_close(db);
+		return 0;
+	}
+
     while ((c = getopt(argc, argv, "d:p:")) != -1)
 	switch (c) {
 	case 'd':
@@ -98,14 +121,18 @@ int main(int argc, char *argv[]) {
     // run out of this directory
     chdir_or_die(root_dir);
 
+	// now, open conection to the database
+	
+
     // now, get to work
     int listen_fd = open_listen_fd_or_die(port);
-	pid_t pid_serv_manager = 0; // fork(); // Wserver process manager Punto 3)
-	if(!pid_serv_manager){
+	pid_t pid_serv_manager = fork(); // Wserver process manager Punto 3)
+	if(pid_serv_manager){
 		while(1){
-			if(!get_memory())
+			if(!get_memory(db))
 				printf("get data succesefull\n");
 		}
+		waitpid(pid_serv_manager, NULL, 0);
 	}
 
 	else{
@@ -136,15 +163,14 @@ int main(int argc, char *argv[]) {
 					while(share_memory(pid_request, time_init, time_end)){
 						printf("Error sharing memory trying again\n\n");
 					}
-					break;
 				}
 			}
 			//Terminate the child process
 			else
 				break;
 		}
-		waitpid(pid_serv_manager, NULL, 0);
-	} 
+	}
+	sqlite3_close(db);
     return 0;
 }
 
