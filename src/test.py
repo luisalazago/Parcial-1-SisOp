@@ -8,7 +8,7 @@ def main():
     k = 1
     for i in range(n):
         response = requests.get(URL)
-        if(response.json()):
+        if(len(response.json())):
             if(k == 1): print("You made 1 request succesefully.")
             else: print("You made {} requests succesefully.".format(k))
             k += 1
