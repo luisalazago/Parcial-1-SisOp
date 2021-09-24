@@ -13,5 +13,8 @@ def main():
             else: print("You made {} requests succesefully.".format(k))
             k += 1
         else: print("Error trying to process a request :/")
+    print("\n============================================")
+    if(k == n): print("The concurrence is right.")
+    else: print("The concurrence has a possible mistake.")
 
 main()
