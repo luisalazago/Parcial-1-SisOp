@@ -27,24 +27,7 @@ static int callback(void *NotUsed, int argc, char **argv, char **azColNAme){
 int insert_database(int* data, 	sqlite3 *db){
 	char *err_msg = 0;
 	int rc;
-
-	// printf("Estoy revisando la creacion %d\n", rc);
-	// if(rc != SQLITE_OK) {
-	// 	fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
-	// 	sqlite3_close(db);
-	// 	return 1;
-	// }
-
-	// char *sql_c = "CREATE TABLE Request(pid INT, time_init INT, time_end INT);";
 	
-	// rc= sqlite3_exec(db, sql_c, 0, 0, &err_msg);
-	// printf("Estoy revisando la Tablar %d\n", rc);
-	// if(rc != SQLITE_OK) {
-	// 	fprintf(stderr, "Cannot create database: %s\n", err_msg);
-	// 	sqlite3_close(db);
-	// 	return 1;
-	// }
-
 	char sql_i[500];
 	sprintf(sql_i, "INSERT INTO Request (pid, time_init, time_end) VALUES(%d, %d, %d);", data[0], data[1], data[2]);
 	rc= sqlite3_exec(db, sql_i, callback, 0, &err_msg);
